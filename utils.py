@@ -59,6 +59,60 @@ def get_black_caplet_iv(price, f, k, df, t, tau=0.25, N=1.0, initial_guess=0.3):
     return iv
 
 
+def normal_caplet_price(
+    f,
+    k,
+    sigma,
+    df,
+    t,
+    tau=0.25,
+    N=1.0,
+):
+    """
+    calculate caplet price (from normal model)
+
+    Args:
+        f: (float) => forward rate
+        k: (float) => strike rate
+        sigma: (float) => Normal volatility
+        df: (float) => discount factor
+        t: (float) => time to reset date in years
+        tau: (float) => forward duration in years (default 0.25)
+        N: (float) => notional amount (default 1.0)
+    Returns:
+        caplet price: (float)
+    """
+    d = (f - k) / (sigma * np.sqrt(tau))
+
+    return df * N * tau * ((f - k) * norm.cdf(d) + sigma * np.sqrt(tau) * norm.pdf(d))
+
+
+def get_normal_caplet_iv(price, f, k, df, t, tau=0.25, N=1.0, initial_guess=0.01):
+    """
+    calculate caplet implied volatility (normal model)
+
+    Args:
+        price: (float) => caplet price
+        f: (float) => forward rate
+        k: (float) => strike rate
+        sigma: (float) => Normal volatility
+        df: (float) => discount factor
+        t: (float) => time to reset date in years
+        tau: (float) => forward duration in years (default 0.25)
+        N: (float) => notional amount (default 1.0)
+        initial_guess: (float) => initial guess of the Normal implied volatility (default 0.01)
+    Returns:
+        iv: (float) => Normal caplet implied volatility
+    """
+    iv = optimize.newton(
+        lambda iv: price
+        - normal_caplet_price(f=f, k=k, sigma=iv, df=df, t=t, tau=tau, N=N),
+        initial_guess,
+    )
+
+    return iv
+
+
 def black_cap_price(
     forward_curve,
     k,
@@ -244,3 +298,24 @@ def zcb_curve_to_forward_swap_curve(zcb_curve, tenors):
     )
 
     return forward_swap_curve
+
+
+if __name__ == "__main__":
+    N = 1.0
+    f = 0.041950
+    k = 0.038863
+    sigma = 0.008461329
+    df = 0.977440241
+    t = 0
+    tau = 0.25
+
+    result = normal_caplet_price(
+        f,
+        k,
+        sigma,
+        df,
+        t,
+        tau,
+        N,
+    )
+    print()

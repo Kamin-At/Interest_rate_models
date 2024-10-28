@@ -42,6 +42,54 @@ def test_get_black_iv():
     assert result == answer, f"value should be {answer} but got {result}"
 
 
+def test_normal_caplet_price():
+    PRECISION = 5
+
+    N = 1.0
+    f = 0.041950
+    k = 0.038863
+    sigma = 0.008461329
+    df = 0.977440241
+    t = 0
+    tau = 0.25
+
+    result = normal_caplet_price(
+        f,
+        k,
+        sigma,
+        df,
+        t,
+        tau,
+        N,
+    )
+    answer = 0.0008947126951
+
+    answer = np.around(answer, PRECISION)
+    result = np.around(result, PRECISION)
+
+    assert result == answer, f"value should be {answer} but got {result}"
+
+
+def test_get_normal_iv():
+    PRECISION = 5
+
+    price = 0.0008947126951
+    N = 1.0
+    f = 0.041950
+    k = 0.038863
+    df = 0.977440241
+    t = 0
+    tau = 0.25
+
+    result = get_normal_caplet_iv(price, f, k, df, t, tau, N)
+    answer = 0.008461329
+
+    answer = np.around(answer, PRECISION)
+    result = np.around(result, PRECISION)
+
+    assert result == answer, f"value should be {answer} but got {result}"
+
+
 def test_black_cap_price():
     PRECISION = 7
 
